@@ -6,7 +6,7 @@ import { AppStackScreenProps } from "../navigators"
 import { colors } from "../theme"
 
 // data array with id and title props of 0-50, with a random height property
-const data = Array.from({ length: 50 }, (_, i) => ({
+const data = Array.from({ length: 100 }, (_, i) => ({
   id: i,
   title: `Item ${i}`,
   height: Math.floor(Math.random() * 250) + 50,
@@ -35,8 +35,10 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
   return (
     <Screen safeAreaEdges={["top", "bottom"]} style={$container}>
       <View style={$controls}>
-        <Button text="Scroll to Index 10" onPress={() => setIndex(10)} />
-        <Button text="Scroll to Index 20" onPress={() => setIndex(25)} />
+        <Button text="To 10" onPress={() => setIndex(10)} />
+        <Button text="To 25" onPress={() => setIndex(25)} />
+        <Button text="To 50" onPress={() => setIndex(50)} />
+        <Button text="To 75" onPress={() => setIndex(75)} />
       </View>
       <FlatList
         ref={ref}
