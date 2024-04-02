@@ -1,42 +1,51 @@
 import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
-import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
-import {
-  Text,
-} from "app/components"
-import { isRTL } from "../i18n"
+import { FlatList, Pressable, View, ViewStyle } from "react-native"
+import { Button, Screen, Text } from "app/components"
 import { AppStackScreenProps } from "../navigators"
-import { colors, spacing } from "../theme"
-import { useSafeAreaInsetsStyle } from "../utils/useSafeAreaInsetsStyle"
+import { colors } from "../theme"
 
-const welcomeLogo = require("../../assets/images/logo.png")
-const welcomeFace = require("../../assets/images/welcome-face.png")
+// data array with id and title props of 0-50, with a random height property
+const data = Array.from({ length: 50 }, (_, i) => ({
+  id: i,
+  title: `Item ${i}`,
+  height: Math.floor(Math.random() * 250) + 50,
+}))
 
 interface WelcomeScreenProps extends AppStackScreenProps<"Welcome"> {}
 
-export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen(
-) {
+export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeScreen() {
+  const ref = React.useRef<FlatList>(null)
+  const [index, setIndex] = React.useState(0)
 
-  const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+  React.useEffect(() => {
+    ref.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 })
+  }, [index])
+
+  const renderItem = React.useCallback(({ item }) => {
+    return (
+      <Pressable onPress={() => setIndex(item.id)}>
+        <View style={[$item, { height: item.height }]}>
+          <Text>{item.title}</Text>
+        </View>
+      </Pressable>
+    )
+  }, [])
 
   return (
-    <View style={$container}>
-      <View style={$topContainer}>
-        <Image style={$welcomeLogo} source={welcomeLogo} resizeMode="contain" />
-        <Text
-          testID="welcome-heading"
-          style={$welcomeHeading}
-          tx="welcomeScreen.readyForLaunch"
-          preset="heading"
-        />
-        <Text tx="welcomeScreen.exciting" preset="subheading" />
-        <Image style={$welcomeFace} source={welcomeFace} resizeMode="contain" />
+    <Screen safeAreaEdges={["top", "bottom"]} style={$container}>
+      <View style={$controls}>
+        <Button text="Scroll to Index 10" onPress={() => setIndex(10)} />
+        <Button text="Scroll to Index 20" onPress={() => setIndex(25)} />
       </View>
-
-      <View style={[$bottomContainer, $bottomContainerInsets]}>
-        <Text tx="welcomeScreen.postscript" size="md" />
-      </View>
-    </View>
+      <FlatList
+        ref={ref}
+        renderItem={renderItem}
+        data={data}
+        initialScrollIndex={index}
+        keyExtractor={(item) => item.id}
+      />
+    </Screen>
   )
 })
 
@@ -45,39 +54,13 @@ const $container: ViewStyle = {
   backgroundColor: colors.background,
 }
 
-const $topContainer: ViewStyle = {
-  flexShrink: 1,
-  flexGrow: 1,
-  flexBasis: "57%",
-  justifyContent: "center",
-  paddingHorizontal: spacing.lg,
+const $controls: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-evenly",
 }
 
-const $bottomContainer: ViewStyle = {
-  flexShrink: 1,
-  flexGrow: 0,
-  flexBasis: "43%",
-  backgroundColor: colors.palette.neutral100,
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
-  paddingHorizontal: spacing.lg,
-  justifyContent: "space-around",
-}
-const $welcomeLogo: ImageStyle = {
-  height: 88,
-  width: "100%",
-  marginBottom: spacing.xxl,
-}
-
-const $welcomeFace: ImageStyle = {
-  height: 169,
-  width: 269,
-  position: "absolute",
-  bottom: -47,
-  right: -80,
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
-}
-
-const $welcomeHeading: TextStyle = {
-  marginBottom: spacing.md,
+const $item: ViewStyle = {
+  backgroundColor: colors.palette.secondary300,
+  borderWidth: 1,
+  borderColor: colors.palette.neutral100,
 }
